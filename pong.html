@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Pong Game</title>
+    <style>
+      #gameArea {
+        width: 600px;
+        height: 400px;
+        border: 2px solid black;
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas id="gameArea"></canvas>
+    <script>
+      // initialize canvas
+      const canvas = document.getElementById("gameArea");
+      const ctx = canvas.getContext("2d");
+      canvas.width = 600;
+      canvas.height = 400;
+
+      // initialize game variables
+      let ballX = canvas.width / 2;
+      let ballY = canvas.height / 2;
+      let ballRadius = 10;
+      let ballSpeedX = 5;
+      let ballSpeedY = 5;
+      let playerPaddleHeight = 100;
+      let playerPaddleWidth = 10;
+      let playerPaddleY = canvas.height / 2 - playerPaddleHeight / 2;
+      let computerPaddleHeight = 100;
+      let computerPaddleWidth = 10;
+      let computerPaddleY = canvas.height / 2 - computerPaddleHeight / 2;
+      let playerScore = 0;
+      let computerScore = 0;
+
+      // move the player's paddle
+      function movePlayerPaddle(e) {
+        playerPaddleY = e.clientY - canvas.offsetTop - playerPaddleHeight / 2;
+      }
+
+      // check if the ball hits the player's paddle
+      function playerPaddleCollision() {
+        if (
+          ballX + ballRadius >= canvas.width - playerPaddleWidth &&
+          ballY + ballRadius > playerPaddleY &&
+          ballY - ballRadius < playerPaddleY + playerPaddleHeight
+        ) {
+          ballSpeedX = -ballSpeedX;
+        }
+      }
+
+      // check if the ball hits the computer's paddle
+      function computerPaddleCollision() {
+        if (
+          ballX - ballRadius <= computerPaddleWidth &&
+          ballY + ballRadius > computerPaddleY &&
+          ballY - ballRadius < computerPaddleY + computerPaddleHeight
+        ) {
+          ballSpeedX = -ballSpeedX;
+        }
+      }
+
+      // draw the ball
+      function drawBall() {
+        ctx.beginPath();
+        ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+        ctx.fillStyle = "black";
+        ctx.fill();
+        ctx.closePath();
+      }
+
+      // draw the player's paddle
+      function drawPlayerPaddle() {
+        ctx.beginPath();
+        ctx.rect(canvas.width - playerPaddleWidth, playerPaddleY, playerPaddleWidth, playerPaddleHeight);
+        ctx.fillStyle = "black";
+        ctx.fill();
+        ctx.closePath();
+      }
+
+      // draw the computer's paddle
+      function drawComputerPaddle() {
+        ctx.beginPath();
+        ctx.rect(0, computerPaddleY, computerPaddleWidth, computerPaddleHeight);
+        ctx.fillStyle = "black";
+        ctx.fill();
+        ctx.closePath();
+      }
+
+      // draw the scores
+      function drawScores() {
+        ctx.font = "20px Arial";
+        ctx.fillText(`Player: ${playerScore}`, canvas.width / 2 + 50, 30);
+        ctx.fillText(`Computer: ${computerScore}`, canvas.width / 2 - 150, 30);
+      }
+
+      // reset the ball
+      function resetBall() {
+        ballX = canvas.width / 2;
+            ballY = canvas.height / 2;
+    ballSpeedX = -ballSpeedX;
+    ballSpeedY = 5;
+  }
+
+  // update the ball position
+  function updateBall() {
+    // move the ball
+    ballX += ballSpeedX;
+    ballY += ballSpeedY;
+
+    // check if the ball hits the top or bottom wall
+    if (ballY - ballRadius <= 0 || ballY + ballRadius >= canvas.height) {
+      ballSpeedY = -ballSpeedY;
+    }
+
+    // check if the ball hits the left wall
+    if (ballX - ballRadius <= 0) {
+      playerScore++;
+      resetBall();
+    }
+
+    // check if the ball hits the right wall
+    if (ballX + ballRadius >= canvas.width) {
+      computerScore++;
+      resetBall();
+    }
+
+    // check if the ball hits the paddles
+    playerPaddleCollision();
+    computerPaddleCollision();
+  }
+
+  // update the computer's paddle position
+  function updateComputerPaddle() {
+    let paddleCenter = computerPaddleY + computerPaddleHeight / 2;
+    if (paddleCenter < ballY - 35) {
+      computerPaddleY += 7;
+    } else if (paddleCenter > ballY + 35) {
+      computerPaddleY -= 7;
+    }
+  }
+
+  // main game loop
+  function gameLoop() {
+    // clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // draw the game elements
+    drawBall();
+    drawPlayerPaddle();
+    drawComputerPaddle();
+    drawScores();
+
+    // update the game state
+    updateBall();
+    updateComputerPaddle();
+
+    // request the next frame
+    requestAnimationFrame(gameLoop);
+  }
+
+  // start the game loop
+  gameLoop();
+
+  // listen for mouse movement to move the player's paddle
+  canvas.addEventListener("mousemove", movePlayerPaddle);
+</script>
+
+  </body>
+</html>
